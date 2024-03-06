@@ -1,0 +1,31 @@
+---
+- name: Deploy Docker container with HTML Page using Apache
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Install Docker Python module
+      pip:
+        name: docker
+
+    - name: Create Docker network
+      docker_network:
+        name: apache_network
+        ipam_config:
+          - subnet: 172.168.10.0/30
+
+    - name: Create Docker container with Apache
+      docker_container:
+        name: network_container
+        image: httpd:latest
+        ports:
+          - "80:80"
+        volumes:
+          - /tmp/network:/usr/local/apache2/htdocs
+        networks:
+          - name: apache_network
+            ipv4_address: 172.168.10.2
+            
+    - name: Copy HTML file to the host
+      copy:
+        src: /Users/user/Project/Network-Project/index.html
+        dest: /tmp/network
